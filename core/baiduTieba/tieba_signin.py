@@ -77,10 +77,10 @@ def client_sign(bduss, tbs, fid, kw):
 
 def user_signin(bduss):
     tbs = get_tbs(bduss)
-    like_list = get_likes(bduss)
     for i in range(3):
         logging.info(f'第 {i} 轮签到')
         i += 1
+        like_list = get_likes(bduss)
         for x in like_list:
             if x.get('is_sign') == 0:
                 time.sleep(random.uniform(1, 2))

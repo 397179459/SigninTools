@@ -27,8 +27,8 @@ PRIVATE_AES_KEY = os.environ.get("PRIVATE_AES_KEY")
 '''
 *********** logging级别设置 ***********
 '''
-LOG_LEVEL = 'DEBUG'
-# LOGGING_LEVEL = 'INFO'
+# LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 
 
 def get_tieba_cf_path():
