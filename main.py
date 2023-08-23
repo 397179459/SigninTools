@@ -1,4 +1,8 @@
 import logging
+import os
+import sys
+
+sys.path.append(os.getcwd())
 
 from my_config import com_config as cfg
 from core.baiduTieba import tieba_signin
