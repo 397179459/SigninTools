@@ -1,7 +1,7 @@
 import logging
 
-from ..my_config import com_config as cfg
-from baiduTieba import tieba_signin
+from my_config import com_config as cfg
+from core.baiduTieba import tieba_signin
 
 logging.basicConfig(level=cfg.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
 
