@@ -46,4 +46,4 @@ jobs:
           PUSHPLUS_KEY: ${{ secrets.PUSHPLUS_KEY }}
           PRIVATE_AES_KEY: ${{ secrets.PRIVATE_AES_KEY }}
         run: |
-          python ././core/main.py
+          python -m core.main
