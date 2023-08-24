@@ -121,7 +121,7 @@ def user_signin(bduss):
         for x in like_list:
             if x.get('is_sign') == 0:
                 client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
-                time.sleep(random.uniform(1, 2))
+                time.sleep(round(random.uniform(0.2, 0.5)))
             else:
                 had_sign_num += 1
 
