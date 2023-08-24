@@ -11,7 +11,7 @@ BAIDUTIEBA_ON = True
 如果你实在不会,就直接用明文吧（O.o）
 '''
 # push plus 微信推送。使用参考 https://www.pushplus.plus
-PUSH_TOKEN = os.environ.get('PUSHPLUS_TOKEN')
+PUSH_TOKEN = os.environ.get('PUSHPLUS_KEY')
 # server酱 微信推送。使用参考 https://sct.ftqq.com/
 SCKEY = os.environ.get('SCKEY')
 
