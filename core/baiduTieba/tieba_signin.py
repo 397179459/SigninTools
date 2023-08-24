@@ -109,32 +109,26 @@ def user_signin(bduss):
     """
     tbs = get_tbs(bduss)
 
-    # 是否存在还没签到的贴吧，如果本轮循环结束都签到完成，那么就不用再签到了
-    need_sign_flag = True
-    like_all_num = 0
-    had_sign_num = 0
-
     # 最多循环3轮签到，有些时候贴吧就是无法签到，可能吧已经被封了
+    like_list = get_likes(bduss)
+    like_all_num = len(like_list)
+    not_sign_num = 0
+    logging.info(f'找到 {like_all_num} 个关注的吧，开始签到')
     for i in range(1, 4):
-        if need_sign_flag:
-            had_sign_num = 0
-            logging.info(f'第 {i} 轮签到')
-            i += 1
-            like_list = get_likes(bduss)
-            like_all_num = len(like_list)
-            logging.info(f'找到 {like_all_num} 个关注的吧，开始签到')
+        logging.info(f'第 {i} 轮签到')
+        # 是否存在还没签到的贴吧，如果本轮循环结束都签到完成，那么就不用再签到了
+        like_list = [x for x in like_list if x.get('is_sign') == 0]
+        not_sign_num = len(like_list)
+        if not_sign_num > 0:
+            logging.info(f'还有 {not_sign_num} 个未签')
             for x in like_list:
-                if x.get('is_sign') == 0:
-                    need_sign_flag = True
-                    client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
-                    time.sleep(random.uniform(1, 2))
-                elif x.get('is_sign') == 1:
-                    need_sign_flag = False
-                    had_sign_num += 1
+                client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
+                time.sleep(random.uniform(1, 2))
         else:
+            logging.info(f'{like_all_num} 个已完全签完')
             break
 
-    return like_all_num, had_sign_num
+    return like_all_num, not_sign_num
 
 
 def run():
@@ -142,17 +136,20 @@ def run():
     tieba_cf_path = cf.com_config.get_tieba_cf_path()
     tieba_config.read(tieba_cf_path, encoding="utf-8")
     sections = tieba_config.sections()
+    send_title = '贴吧签到成功'
     send_msg = ''
     for section in sections:
         _bduss = common_Util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
         _name = tieba_config.get(section, 'name')
         logging.info(f'开始签到 {_name}')
-        like_all_num, had_sign_num = user_signin(_bduss)
-        msg = f'{_name}: 贴吧总数量：{like_all_num} 已签：{had_sign_num}，未签: {like_all_num - had_sign_num}' + '\n'
+        like_all_num, not_sign_num = user_signin(_bduss)
+        if not_sign_num > 0:
+            send_title = '!!!有贴吧签到失败'
+        msg = f'{_name}: 贴吧总数：{like_all_num} 已签：{like_all_num - not_sign_num}，未签: {not_sign_num}' + '\n'
         logging.info(msg)
         send_msg += msg
     logging.info(send_msg)
-    common_Util.send_message.send_pushplus(cf.com_config.PUSH_TOKEN, '百度贴吧签到', send_msg)
+    common_Util.send_message.send_pushplus(cf.com_config.PUSH_TOKEN, send_title, send_msg)
 
 
 if __name__ == '__main__':
