@@ -1,7 +1,7 @@
 import configparser
 import logging
 
-from common import private_crypt
+from core.common_Util import private_crypt
 from my_config import com_config as cf
 
 

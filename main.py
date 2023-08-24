@@ -1,13 +1,10 @@
 import logging
-import os
-import sys
 
-from my_config import com_config as cfg
 from core.baiduTieba import tieba_signin
 
-sys.path.append(os.getcwd())
+import my_config as cf
 
-logging.basicConfig(level=cfg.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
+logging.basicConfig(level=cf.com_config.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
 
 logging.info(r'''
     **************************************
@@ -19,7 +16,7 @@ logging.info(r'''
 
 
 def run():
-    if cfg.BAIDUTIEBA_ON:
+    if cf.com_config.BAIDUTIEBA_ON:
         logging.info('****** 百度贴吧签到 开始运行 ******')
         tieba_signin.run()
         logging.info('****** 百度贴吧签到 完成 ******')
