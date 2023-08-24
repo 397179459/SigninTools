@@ -2,10 +2,10 @@ import logging
 import os
 import sys
 
-sys.path.append(os.getcwd())
-
 from my_config import com_config as cfg
 from core.baiduTieba import tieba_signin
+
+sys.path.append(os.getcwd())
 
 logging.basicConfig(level=cfg.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
 
