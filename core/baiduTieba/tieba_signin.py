@@ -110,18 +110,18 @@ def user_signin(bduss):
     tbs = get_tbs(bduss)
 
     # 最多循环3轮签到，有些时候贴吧就是无法签到，可能吧已经被封了
-    like_list = get_likes(bduss)
-    like_all_num = len(like_list)
+    like_all_num = 0
     not_sign_num = 0
-    logging.info(f'找到 {like_all_num} 个关注的吧，开始签到')
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
+        like_list = get_likes(bduss)
+        like_all_num = len(like_list)
         # 是否存在还没签到的贴吧，如果本轮循环结束都签到完成，那么就不用再签到了
-        like_list = [x for x in like_list if x.get('is_sign') == 0]
-        not_sign_num = len(like_list)
+        not_sign_list = [x for x in like_list if x.get('is_sign') == 0]
+        not_sign_num = len(not_sign_list)
         if not_sign_num > 0:
             logging.info(f'还有 {not_sign_num} 个未签')
-            for x in like_list:
+            for x in not_sign_list:
                 client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
                 time.sleep(random.uniform(1, 2))
         else:
