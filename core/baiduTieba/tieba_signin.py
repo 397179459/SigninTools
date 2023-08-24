@@ -109,24 +109,34 @@ def user_signin(bduss):
     """
     tbs = get_tbs(bduss)
 
-    # 最多循环3轮签到，有些时候贴吧就是无法签到，可能吧已经被封了
+    # 最多循环3轮签到，有些贴吧就是无法签到，可能吧已经被封了
     like_all_num = 0
     not_sign_num = 0
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
         like_list = get_likes(bduss)
         like_all_num = len(like_list)
-        # 是否存在还没签到的贴吧，如果本轮循环结束都签到完成，那么就不用再签到了
-        not_sign_list = [x for x in like_list if x.get('is_sign') == 0]
-        not_sign_num = len(not_sign_list)
-        if not_sign_num > 0:
-            logging.info(f'还有 {not_sign_num} 个未签')
-            for x in not_sign_list:
+        had_sign_num = 0
+
+        for x in like_list:
+            if x.get('is_sign') == 0:
                 client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
                 time.sleep(random.uniform(1, 2))
-        else:
+            else:
+                had_sign_num += 1
+
+        # 先执行签到再执行一遍校验是否全部签到，这里主要是为了防止当天第二次执行脚本
+        if had_sign_num == like_all_num:
             logging.info(f'{like_all_num} 个已完全签完')
             break
+        # 下面校验大概率只有每天第一次运行才会走到
+        else:
+            check_list = get_likes(bduss)
+            not_sign_num = sum(1 for x in check_list if x.get('is_sign') == 0)
+            logging.info(f'还有 {not_sign_num} 个未签')
+            if not_sign_num == 0:
+                logging.info(f'{like_all_num} 个已完全签完')
+                break
 
     return like_all_num, not_sign_num
 
