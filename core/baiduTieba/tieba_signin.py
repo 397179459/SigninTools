@@ -10,10 +10,10 @@ import requests
 import core.common_Util as common_Util
 import my_config as cf
 
-TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'              # 获取tbs
-LIKES_URL_WEB = r'https://tieba.baidu.com/mo/q/newmoindex'     # 网页版获取关注的吧，但是一次最多返回200个
-LIKES_URL_CLIENT = r'http://c.tieba.baidu.com/c/f/forum/like'       # 客户端获取关注的吧
-SIGN_URL = r'http://c.tieba.baidu.com/c/c/forum/sign'          # 客户端签到链接，经验值更高
+TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'  # 获取tbs
+LIKES_URL_WEB = r'https://tieba.baidu.com/mo/q/newmoindex'  # 网页版获取关注的吧，但是一次最多返回200个
+LIKES_URL_CLIENT = r'http://c.tieba.baidu.com/c/f/forum/like'  # 客户端获取关注的吧
+SIGN_URL = r'http://c.tieba.baidu.com/c/c/forum/sign'  # 客户端签到链接，经验值更高
 
 # 用iOS app store 接口获取app最新版本
 TIEBA_VERSION = json.loads(requests.get(r'https://itunes.apple.com/lookup?id=477927812').text)['results'][0]['version']
@@ -25,6 +25,7 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.97 Mobile Safari/537.36 tieba/12.46.1.1',
 }
 
+# 这里用的是我自己手机RedmiK40抓的包,理论上都可以，服务端应该没做校验
 SIGN_DATA = {
     '_client_id': 'wappc_1692700560616_448',
     '_client_type': '2',
@@ -72,31 +73,61 @@ def get_tbs(bduss):
     logging.info('get tbs end')
 
 
+def add_to_like_list(forum_key, forum_list, like_list):
+    """
+    增加关注的贴吧
+    :param forum_key:
+    :param forum_list:
+    :param like_list:
+    :return:
+    """
+    if forum_key in forum_list and len(forum_list[forum_key]) > 0:
+        for x in forum_list[forum_key]:
+            tmp_dict = {
+                'forum_id': x['id'],
+                'forum_name': x['name'],
+            }
+            like_list.append(tmp_dict)
+
+
 def get_likes_client(bduss):
     """
-    获取用户关注的贴吧
+    客户端接口获取用户关注的贴吧
     :param bduss:
     :return:
     """
+    NON_GCONFORUM = 'non-gconforum'  # 没有“百度贴吧企业平台认证”,大部分吧都是
+    GCONFORUM = 'gconforum'  # “百度贴吧企业平台认证”，只有少部分吧才有
+
     headers = copy.copy(HEADERS)
     headers.update({'cookie': f'BDUSS={bduss}'})
-    for i in range(1, 4):
+
+    like_list = []
+    # 是否还有下一页
+    has_more = '1'
+    i = 1
+    while has_more == '1':
         sign_data = copy.copy(SIGN_DATA)
         sign_data.update({'page_no': str(i), 'page_size': '100'})
         _data = encode_data(sign_data)
+
         like_response = _session.post(url=LIKES_URL_CLIENT, headers=headers, data=_data, timeout=5).json()
-    like_list = []
+        has_more = like_response['has_more']
+        tmp_forum_l = like_response['forum_list']
 
+        add_to_like_list(NON_GCONFORUM, tmp_forum_l, like_list)
+        add_to_like_list(GCONFORUM, tmp_forum_l, like_list)
 
+        i += 1
 
     return like_list
 
 
 def get_likes_web(bduss):
     """
-    获取用户关注的贴吧
+    通过web接口获取用户关注的贴吧
     :param bduss:
-    :return:
+    :return: 关注的贴吧列表
     """
     headers = copy.copy(HEADERS)
     headers.update({'cookie': f'BDUSS={bduss}'})
@@ -108,17 +139,26 @@ def get_likes_web(bduss):
 def client_sign(bduss, tbs, fid, kw):
     """
     客户端贴吧签到接口
-    :param bduss: 百度唯一标识，每次都一样，但是都有效
+    :param bduss: 百度唯一标识，每次都不一样，但是都有效
     :param tbs:
     :param fid: 贴吧唯一id
     :param kw: 贴吧名称
     :return:
     """
-    # 这里用的是我自己手机RedmiK40抓的包,理论上都可以，服务端应该没做校验
     sign_data = copy.copy(SIGN_DATA)
     sign_data.update({'BDUSS': bduss, 'tbs': tbs, 'fid': fid, 'kw': kw, 'timestamp': str(int(time.time()))})
     _data = encode_data(sign_data)
-    _session.post(url=SIGN_URL, data=_data, timeout=5).json()
+    rsp = _session.post(url=SIGN_URL, data=_data, timeout=5).json()
+    if 'user_info' in rsp and rsp['user_info']['is_sign_in'] == '1':
+        logging.info(f'{kw}: 签到成功')
+        return True
+
+    if rsp['error_code'] == '160002':
+        logging.info(f'{kw}: {rsp["error_msg"]}')
+        return True
+
+    logging.error(f'{kw}: {rsp["error_code"]}:{rsp["error_msg"]}')
+    return False
 
 
 def user_signin(bduss):
@@ -128,10 +168,9 @@ def user_signin(bduss):
     :return:
     """
     tbs = get_tbs(bduss)
-
-    # 最多循环3轮签到，有些贴吧就是无法签到，可能吧已经被封了
     like_all_num = 0
-    not_sign_num = 0
+    had_sign_num = 0
+    # 最多循环3轮签到，有些贴吧就是无法签到，可能吧已经被封了
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
         like_list = get_likes_client(bduss)
@@ -139,26 +178,18 @@ def user_signin(bduss):
         had_sign_num = 0
 
         for x in like_list:
-            if x.get('is_sign') == 0:
-                client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
-                time.sleep(round(random.uniform(0.2, 0.5)))
-            else:
+            is_sign_flag = client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
+            if is_sign_flag:
                 had_sign_num += 1
+                like_list.remove(x)
+                time.sleep(round(random.uniform(0.1, 0.4), 1))
 
         # 先执行签到再执行一遍校验是否全部签到，这里主要是为了防止当天第二次执行脚本
-        if had_sign_num == like_all_num:
+        if len(like_list) == 0:
             logging.info(f'{like_all_num} 个已完全签完')
             break
-        # 下面校验大概率只有每天第一次运行才会走到
-        else:
-            check_list = get_likes_client(bduss)
-            not_sign_num = sum(1 for x in check_list if x.get('is_sign') == 0)
-            logging.info(f'还有 {not_sign_num} 个未签')
-            if not_sign_num == 0:
-                logging.info(f'{like_all_num} 个已完全签完')
-                break
 
-    return like_all_num, not_sign_num
+    return like_all_num, had_sign_num
 
 
 def run():
@@ -172,10 +203,11 @@ def run():
         _bduss = common_Util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
         _name = tieba_config.get(section, 'name')
         logging.info(f'开始签到 {_name}')
-        like_all_num, not_sign_num = user_signin(_bduss)
+        like_all_num, had_sign_num = user_signin(_bduss)
+        not_sign_num = like_all_num - had_sign_num
         if not_sign_num > 0:
             send_title = '!!!有贴吧签到失败'
-        msg = f'{_name}: 贴吧总数：{like_all_num} 已签：{like_all_num - not_sign_num}，未签: {not_sign_num}' + '\n'
+        msg = f'{_name}: 贴吧总数：{like_all_num} 已签：{had_sign_num}，未签: {not_sign_num}' + '\n'
         logging.info(msg)
         send_msg += msg
     logging.info(send_msg)
