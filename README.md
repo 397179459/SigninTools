@@ -1,4 +1,4 @@
-# SigninTools
+# SigninTools 签到工具合集
 <p align="center">
   <a href="https://hits.seeyoufarm.com">
      <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2F397179459%2FSigninTools&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false"/>
@@ -17,9 +17,9 @@
   </a>
 </p>
 
-## 简介
-签到合集工具，支持合集：
-- [x] 百度贴吧
+#### 支持合集：
+- [x] 百度贴吧 
+
 #### 百度贴吧
 - 用的是手机端的接口，签到经验更多，用户只需要填写`BDUSS`即可，利用Actions每日自动签到。
 - 支持推送运行结果至微信(`server酱` `PushPlus`)
@@ -31,8 +31,6 @@
 ### 2.获取BDUSS
 
 在网页中登录上贴吧，然后按下`F12`打开调试模式，在`cookie`中找到`BDUSS`，并复制其`Value`值。
-
-![](./assets/获取BDUSS.gif)
 
 ### 3.在Github Secrets配置你的AES密钥，pushplus，server酱的key
 
