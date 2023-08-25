@@ -168,16 +168,15 @@ def user_signin(bduss):
     :return:
     """
     tbs = get_tbs(bduss)
-    like_all_num = 0
     had_sign_num = 0
+    like_list = get_likes_client(bduss)
+    like_all_num = len(like_list)
     # 最多循环3轮签到，有些贴吧就是无法签到，可能吧已经被封了
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
-        like_list = get_likes_client(bduss)
-        like_all_num = len(like_list)
         had_sign_num = 0
 
-        for x in like_list:
+        for x in like_list.copy():
             is_sign_flag = client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
             if is_sign_flag:
                 had_sign_num += 1
