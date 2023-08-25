@@ -10,12 +10,10 @@ import requests
 import core.common_Util as common_Util
 import my_config as cf
 
-# API_URL
-TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'
-LIKES_URL = r'https://tieba.baidu.com/mo/q/newmoindex'
-# LIKES_URL = r'http://c.tieba.baidu.com/c/f/forum/like'
-# 客户端签到链接，经验值更高
-SIGN_URL = r'http://c.tieba.baidu.com/c/c/forum/sign'
+TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'              # 获取tbs
+LIKES_URL_WEB = r'https://tieba.baidu.com/mo/q/newmoindex'     # 网页版获取关注的吧，但是一次最多返回200个
+LIKES_URL_CLIENT = r'http://c.tieba.baidu.com/c/f/forum/like'       # 客户端获取关注的吧
+SIGN_URL = r'http://c.tieba.baidu.com/c/c/forum/sign'          # 客户端签到链接，经验值更高
 
 # 用iOS app store 接口获取app最新版本
 TIEBA_VERSION = json.loads(requests.get(r'https://itunes.apple.com/lookup?id=477927812').text)['results'][0]['version']
@@ -25,6 +23,15 @@ AES_KEY = common_Util.private_crypt.get_aes_key()
 HEADERS = {
     'Host': 'tieba.baidu.com',
     'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.97 Mobile Safari/537.36 tieba/12.46.1.1',
+}
+
+SIGN_DATA = {
+    '_client_id': 'wappc_1692700560616_448',
+    '_client_type': '2',
+    '_client_version': TIEBA_VERSION,
+    '_phone_imei': '000000000000000',
+    'model': 'M2012K11AC',
+    "net_type": "1",
 }
 
 _session = requests.Session()
@@ -58,14 +65,14 @@ def get_tbs(bduss):
     headers.update({'Cookie': f'BDUSS={bduss}'})
     try:
         tbs = _session.get(url=TBS_URL, headers=headers, timeout=5).json()['tbs']
+        return tbs
     except Exception as e:
         logging.error(e)
         logging.info('failed get tbs')
     logging.info('get tbs end')
-    return tbs
 
 
-def get_likes(bduss):
+def get_likes_client(bduss):
     """
     获取用户关注的贴吧
     :param bduss:
@@ -73,7 +80,27 @@ def get_likes(bduss):
     """
     headers = copy.copy(HEADERS)
     headers.update({'cookie': f'BDUSS={bduss}'})
-    like_response = _session.get(url=LIKES_URL, headers=headers, timeout=5).json()
+    for i in range(1, 4):
+        sign_data = copy.copy(SIGN_DATA)
+        sign_data.update({'page_no': str(i), 'page_size': '100'})
+        _data = encode_data(sign_data)
+        like_response = _session.post(url=LIKES_URL_CLIENT, headers=headers, data=_data, timeout=5).json()
+    like_list = []
+
+
+
+    return like_list
+
+
+def get_likes_web(bduss):
+    """
+    获取用户关注的贴吧
+    :param bduss:
+    :return:
+    """
+    headers = copy.copy(HEADERS)
+    headers.update({'cookie': f'BDUSS={bduss}'})
+    like_response = _session.get(url=LIKES_URL_WEB, headers=headers, timeout=5).json()
     like_list = like_response['data']['like_forum']
     return like_list
 
@@ -88,14 +115,7 @@ def client_sign(bduss, tbs, fid, kw):
     :return:
     """
     # 这里用的是我自己手机RedmiK40抓的包,理论上都可以，服务端应该没做校验
-    sign_data = {
-        '_client_id': 'wappc_1692700560616_448',
-        '_client_type': '2',
-        '_client_version': TIEBA_VERSION,
-        '_phone_imei': '000000000000000',
-        'model': 'M2012K11AC',
-        "net_type": "1",
-    }
+    sign_data = copy.copy(SIGN_DATA)
     sign_data.update({'BDUSS': bduss, 'tbs': tbs, 'fid': fid, 'kw': kw, 'timestamp': str(int(time.time()))})
     _data = encode_data(sign_data)
     _session.post(url=SIGN_URL, data=_data, timeout=5).json()
@@ -114,7 +134,7 @@ def user_signin(bduss):
     not_sign_num = 0
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
-        like_list = get_likes(bduss)
+        like_list = get_likes_client(bduss)
         like_all_num = len(like_list)
         had_sign_num = 0
 
@@ -131,7 +151,7 @@ def user_signin(bduss):
             break
         # 下面校验大概率只有每天第一次运行才会走到
         else:
-            check_list = get_likes(bduss)
+            check_list = get_likes_client(bduss)
             not_sign_num = sum(1 for x in check_list if x.get('is_sign') == 0)
             logging.info(f'还有 {not_sign_num} 个未签')
             if not_sign_num == 0:
