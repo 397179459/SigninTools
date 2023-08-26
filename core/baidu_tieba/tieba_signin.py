@@ -3,11 +3,14 @@ import copy
 import hashlib
 import json
 import logging
+import os
 import random
+import sys
 import time
 import requests
 
-import core.common_util as common_util
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from core import common_util
 import my_config as cf
 
 tieba_cf_path = 'tieba_config'
