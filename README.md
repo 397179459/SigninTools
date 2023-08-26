@@ -13,6 +13,9 @@
     <img src="https://img.shields.io/github/issues-closed-raw/397179459/SigninTools" alt="GitHub Closed Issues">
   </a>
   <a href="https://github.com/397179459/SigninTools">
+    <img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/y/397179459/SigninTools">
+  </a>
+  <a href="https://github.com/397179459/SigninTools">
     <img src="https://img.shields.io/github/last-commit/397179459/SigninTools" alt="GitHub Last Commit">
   </a>
 </p>
