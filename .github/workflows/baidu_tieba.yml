@@ -45,4 +45,4 @@ jobs:
           PUSHPLUS_KEY: ${{ secrets.PUSHPLUS_KEY }}
           PRIVATE_AES_KEY: ${{ secrets.PRIVATE_AES_KEY }}
         run: |
-          python -u ${BASE_PATH}main.py
+          python -u ${BASE_PATH}tieba_signin.py
