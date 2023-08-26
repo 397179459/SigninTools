@@ -7,7 +7,7 @@ import random
 import time
 import requests
 
-import core.common_Util as common_Util
+import core.common_util as common_util
 import my_config as cf
 
 TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'  # 获取tbs
@@ -18,7 +18,7 @@ SIGN_URL = r'http://c.tieba.baidu.com/c/c/forum/sign'  # 客户端签到链接�
 # 用iOS app store 接口获取app最新版本
 TIEBA_VERSION = json.loads(requests.get(r'https://itunes.apple.com/lookup?id=477927812').text)['results'][0]['version']
 
-AES_KEY = common_Util.private_crypt.get_aes_key()
+AES_KEY = common_util.private_crypt.get_aes_key()
 
 HEADERS = {
     'Host': 'tieba.baidu.com',
@@ -199,7 +199,7 @@ def run():
     send_title = '贴吧签到成功'
     send_msg = ''
     for section in sections:
-        _bduss = common_Util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
+        _bduss = common_util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
         _name = tieba_config.get(section, 'name')
         logging.info(f'开始签到 {_name}')
         like_all_num, had_sign_num = user_signin(_bduss)
@@ -210,7 +210,7 @@ def run():
         logging.info(msg)
         send_msg += msg
     logging.info(send_msg)
-    common_Util.send_message.send_pushplus(cf.com_config.PUSH_TOKEN, send_title, send_msg)
+    common_util.send_message.send_pushplus(cf.com_config.PUSH_TOKEN, send_title, send_msg)
 
 
 if __name__ == '__main__':
