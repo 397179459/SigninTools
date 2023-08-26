@@ -6,7 +6,7 @@ from my_config import com_config as cf
 
 
 tieba_config = configparser.ConfigParser()
-tieba_cf_path = cf.get_tieba_cf_path()
+tieba_cf_path = 'tieba_config'
 tieba_config.read(tieba_cf_path, encoding="utf-8")
 sections = tieba_config.sections()
 
