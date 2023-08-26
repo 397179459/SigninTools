@@ -1,5 +1,6 @@
 import configparser
 import copy
+import datetime
 import hashlib
 import json
 import logging
@@ -18,6 +19,8 @@ tieba_cf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'tieba_c
 logging.basicConfig(level=cf.com_config.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
 
 logging.info(cf.com_config.get_author_info('百度贴吧自动签到'))
+
+TODAY = datetime.date.today().strftime("%Y%m%d")
 
 TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'  # 获取tbs
 LIKES_URL_WEB = r'https://tieba.baidu.com/mo/q/newmoindex'  # 网页版获取关注的吧，但是一次最多返回200个
@@ -209,6 +212,10 @@ def run():
     send_title = '贴吧签到成功'
     send_msg = ''
     for section in sections:
+        if (TODAY < (tieba_config.get(section, 'start_date'))
+                or (TODAY > tieba_config.get(section, 'end_date'))):
+            continue
+
         _bduss = common_util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
         _name = tieba_config.get(section, 'name')
         logging.info(f'开始签到 {_name}')
