@@ -12,7 +12,7 @@ on:
 
 env:
   TZ: Asia/Shanghai
-  BASE_PATH: '.core/baidu_tieba/'
+  BASE_PATH: 'core/baidu_tieba/'
 
 permissions:
   contents: read
