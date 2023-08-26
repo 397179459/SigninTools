@@ -5,9 +5,9 @@ name: TiebaSignin
 
 on:
   push:
-    branches: [ "main" ]
+
     paths:
-      - '.github/workflows/**'
+      - '.core/baidu_tieba/tieba_actions_run'
   schedule:
     - cron: '37 19,13 * * *'
 
