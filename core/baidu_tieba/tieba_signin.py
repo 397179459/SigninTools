@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from core import common_util
 import my_config as cf
 
-tieba_cf_path = 'tieba_config'
+tieba_cf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'tieba_config'))
 
 logging.basicConfig(level=cf.com_config.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
 
