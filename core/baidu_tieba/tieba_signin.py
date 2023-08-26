@@ -201,9 +201,11 @@ def user_signin(bduss):
 
 
 def run():
+    logging.info('Start run')
     tieba_config = configparser.ConfigParser()
     tieba_config.read(tieba_cf_path, encoding="utf-8")
     sections = tieba_config.sections()
+    logging.info(sections)
     send_title = '贴吧签到成功'
     send_msg = ''
     for section in sections:
