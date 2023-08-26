@@ -10,6 +10,12 @@ import requests
 import core.common_util as common_util
 import my_config as cf
 
+tieba_cf_path = 'tieba_config'
+
+logging.basicConfig(level=cf.com_config.LOG_LEVEL, format='%(asctime)s-%(levelname)s: %(message)s')
+
+logging.info(cf.com_config.get_author_info('百度贴吧自动签到'))
+
 TBS_URL = r'http://tieba.baidu.com/dc/common/tbs'  # 获取tbs
 LIKES_URL_WEB = r'https://tieba.baidu.com/mo/q/newmoindex'  # 网页版获取关注的吧，但是一次最多返回200个
 LIKES_URL_CLIENT = r'http://c.tieba.baidu.com/c/f/forum/like'  # 客户端获取关注的吧
@@ -193,7 +199,6 @@ def user_signin(bduss):
 
 def run():
     tieba_config = configparser.ConfigParser()
-    tieba_cf_path = cf.com_config.get_tieba_cf_path()
     tieba_config.read(tieba_cf_path, encoding="utf-8")
     sections = tieba_config.sections()
     send_title = '贴吧签到成功'
@@ -214,4 +219,6 @@ def run():
 
 
 if __name__ == '__main__':
+    logging.info('****** 百度贴吧签到 开始运行 ******')
     run()
+    logging.info('****** 百度贴吧签到 运行结束 ******')
