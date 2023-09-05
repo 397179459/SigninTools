@@ -186,7 +186,6 @@ def user_signin(bduss):
     # 最多循环3轮签到，有些贴吧就是无法签到，可能吧已经被封了
     for i in range(1, 4):
         logging.info(f'第 {i} 轮签到')
-        had_sign_num = 0
 
         for x in like_list.copy():
             is_sign_flag = client_sign(bduss, tbs, x.get('forum_id'), x.get('forum_name'))
