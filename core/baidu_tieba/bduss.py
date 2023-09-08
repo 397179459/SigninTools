@@ -27,7 +27,7 @@ def add_bduss():
         end_date = common_util.input_date.input_end_date(phone)
 
         bduss = input(f'请输入{phone}的BDUSS,如果不知道怎么获取自行百度:').strip()
-        encrypt_bduss = private_crypt.encrypt_aes_ebc(bduss, aes_key)
+        encrypt_bduss = private_crypt.encrypt_aes_ecb(bduss, aes_key)
 
         tieba_config.set(phone, 'name', name)
         tieba_config.set(phone, 'start_date', start_date)

@@ -215,7 +215,7 @@ def run():
                 or (TODAY > tieba_config.get(section, 'end_date'))):
             continue
 
-        _bduss = common_util.private_crypt.decrypt_aes_ebc(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
+        _bduss = common_util.private_crypt.decrypt_aes_ecb(tieba_config.get(section, 'encrypt_bduss'), AES_KEY)
         _name = tieba_config.get(section, 'name')
         logging.info(f'开始签到 {_name}')
         like_all_num, had_sign_num = user_signin(_bduss)

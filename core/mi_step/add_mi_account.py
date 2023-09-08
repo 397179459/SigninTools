@@ -52,9 +52,9 @@ def add_mi_account():
         _config.set(hide_phone, 'name', name)
         _config.set(hide_phone, 'start_date', start_date)
         _config.set(hide_phone, 'end_date', end_date)
-        encrypt_phone = common_util.private_crypt.encrypt_aes_ebc(phone, aes_key)
+        encrypt_phone = common_util.private_crypt.encrypt_aes_ecb(phone, aes_key)
         _config.set(hide_phone, 'encrypt_phone', encrypt_phone)
-        encrypt_pwd = common_util.private_crypt.encrypt_aes_ebc(pwd, aes_key)
+        encrypt_pwd = common_util.private_crypt.encrypt_aes_ecb(pwd, aes_key)
         _config.set(hide_phone, 'encrypt_pwd', encrypt_pwd)
         _config.set(hide_phone, 'step_num', step_num)
 

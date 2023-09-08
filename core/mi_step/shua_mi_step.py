@@ -154,8 +154,8 @@ def run():
 
         _name = mistep_config.get(section, 'name')
 
-        phone = common_util.private_crypt.decrypt_aes_ebc(mistep_config.get(section, 'encrypt_phone'), AES_KEY)
-        pwd = common_util.private_crypt.decrypt_aes_ebc(mistep_config.get(section, 'encrypt_pwd'), AES_KEY)
+        phone = common_util.private_crypt.decrypt_aes_ecb(mistep_config.get(section, 'encrypt_phone'), AES_KEY)
+        pwd = common_util.private_crypt.decrypt_aes_ecb(mistep_config.get(section, 'encrypt_pwd'), AES_KEY)
         step_num = mistep_config.get(section, 'step_num')
         if '#' in step_num:
             step_num = random.randint(int(step_num.split('#')[0]), int(step_num.split('#')[1]))
