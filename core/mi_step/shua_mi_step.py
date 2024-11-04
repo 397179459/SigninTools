@@ -9,6 +9,8 @@ import time
 
 import requests
 
+from datetime import datetime, timedelta
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from core import common_util
 import my_config as cf
@@ -122,14 +124,12 @@ def shua_step(user, passwd, step):
 
 
 def get_time():
-    '''
-    同步淘宝时间
-    :return: 时间戳
-    '''
-    url = 'http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp'
-    response = requests.get(url, headers=headers).json()
-    t = response['data']['t']
-    return t
+    response = requests.get('http://worldclockapi.com/api/json/utc/now')  
+    data = response.json()  
+    utc_time = datetime.strptime(data['currentDateTime'], "%Y-%m-%dT%H:%M:%S%z")  
+    china_time = utc_time + timedelta(hours=8)  
+    timestamp = int(time.mktime(china_time.timetuple()))  
+    return timestamp
 
 
 def get_app_token(login_token):
