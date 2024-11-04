@@ -9,8 +9,6 @@ import time
 
 import requests
 
-from datetime import datetime, timedelta
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from core import common_util
 import my_config as cf
@@ -124,12 +122,21 @@ def shua_step(user, passwd, step):
 
 
 def get_time():
-    response = requests.get('http://worldclockapi.com/api/json/utc/now')  
+    # 使用一个返回UTC时间的API  
+    response = requests.get('http://worldtimeapi.org/api/timezone/Etc/UTC')  
     data = response.json()  
-    utc_time = datetime.strptime(data['currentDateTime'], "%Y-%m-%dT%H:%M:%S%z")  
-    china_time = utc_time + timedelta(hours=8)  
-    timestamp = int(time.mktime(china_time.timetuple()))  
-    return timestamp
+    utc_datetime_str = data['datetime']  
+      
+    # 将UTC时间字符串转换为datetime对象  
+    utc_datetime = datetime.datetime.strptime(utc_datetime_str, "%Y-%m-%dT%H:%M:%S.%f%z")  
+      
+    # 将UTC时间转换为北京时间（UTC+8小时）  
+    china_datetime = utc_datetime + datetime.timedelta(hours=8)  
+      
+    # 将datetime对象转换为时间戳  
+    china_timestamp = int(time.mktime(china_datetime.timetuple()))  
+      
+    return china_timestamp
 
 
 def get_app_token(login_token):
