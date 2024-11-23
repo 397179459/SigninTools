@@ -226,7 +226,7 @@ def run():
         logging.info(msg)
         send_msg += msg
     logging.info(send_msg)
-    common_util.send_message.send_pushplus(cf.com_config.PUSH_TOKEN, send_title, send_msg)
+    common_util.send_message.send_server_chan(cf.com_config.SCKEY, send_title, send_msg)
 
 
 if __name__ == '__main__':
