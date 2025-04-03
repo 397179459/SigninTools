@@ -121,7 +121,7 @@ def shua_step(user, passwd, step):
     return result_msg
 
 
-def get_time():
+def get_time_old():
     # 使用一个返回UTC时间的API  
     response = requests.get('http://worldtimeapi.org/api/timezone/Etc/UTC')  
     data = response.json()  
@@ -137,6 +137,24 @@ def get_time():
     china_timestamp = int(time.mktime(china_datetime.timetuple()))  
       
     return china_timestamp
+
+
+def get_time():
+    try:
+        # 阿里云公共时间 API
+        response = requests.get('https://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp')
+        data = response.json()
+        utc_timestamp = int(data['data']['t']) / 1000
+        utc_datetime = datetime.datetime.utcfromtimestamp(utc_timestamp)
+        # 将 UTC 时间转换为北京时间（UTC+8 小时）
+        china_datetime = utc_datetime + datetime.timedelta(hours=8)
+        # 将 datetime 对象转换为时间戳
+        china_timestamp = int(china_datetime.timestamp())
+        return china_timestamp
+    except Exception as e:
+        print(f"请求 API 时出现错误: {e}")
+        return None
+    
 
 
 def get_app_token(login_token):
