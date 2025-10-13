@@ -28,6 +28,26 @@ headers = {
     'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 9; MI 6 MIUI/20.6.18)'
 }
 
+MI_DEVICES = [
+    # 小米14系列 (Android 14)
+    "Mozilla/5.0 (Linux; Android 14; 23127PN0CC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+
+    # 红米K70 Pro (Android 14)
+    "Mozilla/5.0 (Linux; Android 14; 2311DRK48C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36",
+
+    # 小米13 Ultra (Android 13)
+    "Mozilla/5.0 (Linux; Android 13; 2304FPN6DG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36",
+
+    # 红米Note 13 Pro+ (Android 13)
+    "Mozilla/5.0 (Linux; Android 13; 23090RA98C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36",
+
+    # 小米平板6 Max (Android 14)
+    "Mozilla/5.0 (Linux; Android 14; 2307BRPDCC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+
+    # 红米K60至尊版 (Android 13)
+    "Mozilla/5.0 (Linux; Android 13; 23078RKD5C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36"
+]
+
 
 def get_code(location):
     code_pattern = re.compile("(?<=access=).*?(?=&)")
@@ -42,21 +62,17 @@ def login(user, password):
     :param password:
     :return: token, userid
     '''
-    url_regis = "https://api-user.huami.com/registrations/+86" + user + "/tokens"
+    url_regis = "https://api-user.zepp.com/registrations/+86" + user + "/tokens"
+    data_regis = f"client_id=HuaMi&country_code=CN&json_response=true&name={user}&password={password}&redirect_uri=https://s3-us-west-2.amazonaws.com/hm-registration/successsignin.html&state=REDIRECTION&token=access"
     login_headers = {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        "User-Agent": "MiFit/5.3.0 (iPhone; iOS 14.4.1; Scale/3.00)"
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": random.choice(MI_DEVICES),
+        "app_name": "com.xiaomi.hm.health"
     }
-    data_regis = {
-        "client_id": "HuaMi",
-        "password": f"{password}",
-        "redirect_uri": "https://s3-us-west-2.amazonaws.com/hm-registration/successsignin.html",
-        "token": "access"
-    }
-    response_regis = requests.post(url_regis, data=data_regis, headers=login_headers, allow_redirects=False)
+    response_regis = requests.post(url_regis, data=data_regis, headers=login_headers)
     try:
-        location = response_regis.headers["Location"]
-        code = get_code(location)
+        response_regis_json = response_regis.json()
+        code = response_regis_json["access"]
     except Exception:
         return 0, 0
 
