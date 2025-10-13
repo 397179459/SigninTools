@@ -25,7 +25,9 @@ AES_KEY = common_util.private_crypt.get_aes_key()
 TODAY = datetime.date.today().strftime("%Y%m%d")
 now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 headers = {
-    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 9; MI 6 MIUI/20.6.18)'
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "MiFit/6.12.0 (MCE16; Android 16; Density/1.5)",
+    "app_name": "com.xiaomi.hm.health"
 }
 
 MI_DEVICES = [
@@ -157,16 +159,10 @@ def get_time_old():
 
 def get_time():
     try:
-        # 阿里云公共时间 API
-        response = requests.get('https://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp')
-        data = response.json()
-        utc_timestamp = int(data['data']['t']) / 1000
-        utc_datetime = datetime.datetime.utcfromtimestamp(utc_timestamp)
-        # 将 UTC 时间转换为北京时间（UTC+8 小时）
-        china_datetime = utc_datetime + datetime.timedelta(hours=8)
-        # 将 datetime 对象转换为时间戳
-        china_timestamp = int(china_datetime.timestamp())
-        return china_timestamp
+        url = "https://acs.m.taobao.com/gw/mtop.common.getTimestamp/"
+        response = requests.get(url, headers=headers).json()
+        t = response["data"]["t"]
+        return t
     except Exception as e:
         print(f"请求 API 时出现错误: {e}")
         return None
